@@ -1,9 +1,9 @@
-package org.dist.simplekafka2
+package org.bilal.simplekafka2
 
 import org.dist.queue.common.TopicAndPartition
 import org.dist.queue.utils.ZkUtils.Broker
 import org.dist.simplekafka.{LeaderAndReplicas, PartitionInfo, PartitionReplicas}
-import org.dist.simplekafka2.KafkaClient2.ControllerExists
+import org.bilal.simplekafka2.KafkaClient2.ControllerExists
 
 class Controller2(brokerId:Int, kafkaClient: KafkaClient2) {
 
@@ -15,12 +15,12 @@ class Controller2(brokerId:Int, kafkaClient: KafkaClient2) {
       case Some(newController) =>
         currentController = newController.toInt
       case None =>
-        elect()
+        electController()
     }
-    elect()
+    electController()
   }
 
-  def elect(): Unit = {
+  def electController(): Unit = {
     kafkaClient.tryToBeController(brokerId.toString) match {
       case Left(_) =>
         currentController = brokerId

@@ -19,4 +19,6 @@ object Libs {
   val `jamm` = "com.github.jbellis" % "jamm" % "0.3.3"
   val `mockito` = "org.mockito" %% "mockito-scala" % "1.5.16"
   val `pcj` = "pcj" % "pcj" % "1.2"
+  val `borer-core` = "io.bullet" %% "borer-core" % "1.1.0"
+  val `borer-derivation` = "io.bullet" %% "borer-derivation" % "1.1.0"
 }
