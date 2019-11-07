@@ -9,6 +9,7 @@ import org.I0Itec.zkclient.{IZkDataListener, ZkClient}
 import org.bilal.json.Codecs
 
 import scala.jdk.CollectionConverters._
+import scala.util.control.NonFatal
 class ZookeeperClient2(zkClient: ZkClient) extends Codecs{
 
   def shutdown(): Unit = zkClient.close()
@@ -17,8 +18,14 @@ class ZookeeperClient2(zkClient: ZkClient) extends Codecs{
     zkClient.readData[String](path).getBytes()
   ).to[T].value
 
-  def allChildren(path:String): Set[Int] =
-    zkClient.getChildren(path).asScala.map(_.toInt).toSet
+  def allChildren(path:String): Set[Int] = {
+      try {
+        zkClient.getChildren(path).asScala.map(_.toInt).toSet
+      }
+      catch {
+        case NonFatal(_:ZkNoNodeException) => Set.empty
+      }
+    }
 
   def createEphemeralPath[T:Codec](path:String, data:T): Unit ={
     try{
