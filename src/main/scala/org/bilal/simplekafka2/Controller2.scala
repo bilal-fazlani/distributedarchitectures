@@ -6,42 +6,41 @@ import org.dist.simplekafka.{LeaderAndReplicas, PartitionInfo, PartitionReplicas
 import org.bilal.simplekafka2.KafkaClient2.ControllerExists
 
 class Controller2(brokerId:Int, kafkaClient: KafkaClient2) {
-
   var liveBrokers: Set[Broker] = Set()
   var currentController: Int = -1
 
-  def startup(): Unit = {
+  def start(): Unit = {
     kafkaClient.subscriberControllerChanges {
       case Some(newController) =>
-        currentController = newController.toInt
+        currentController = newController
       case None =>
         electController()
     }
     electController()
   }
 
-  def electController(): Unit = {
-    kafkaClient.tryToBeController(brokerId.toString) match {
-      case Left(_) =>
+  private def electController(): Unit = {
+    kafkaClient.tryToBeController(brokerId) match {
+      case Right(_) =>
         currentController = brokerId
         onBecomingLeader()
-      case Right(ControllerExists(controllerId)) =>
-        currentController = controllerId.toInt
+      case Left(ControllerExists(controllerId)) =>
+        currentController = controllerId
     }
   }
 
-  def onBecomingLeader():Unit = {
+  private def onBecomingLeader():Unit = {
     liveBrokers = liveBrokers ++ kafkaClient.allBrokers
     kafkaClient.subscribeToTopicChanges(topics => {
       topics.foreach(t => {
         val assignments = kafkaClient.getPartitionAssignmentsForTopic(t)
         val leadersAndReplicas = selectLeaderAndFollowerBrokersForPartitions(t,assignments)
+        //fixme: send information using socket
         println(leadersAndReplicas)
       })
     })
-
     kafkaClient.subscribeToBrokerChanges(brokerIds => {
-      liveBrokers = brokerIds.map(kafkaClient.getBrokerInfo).toSet
+      liveBrokers = brokerIds.map(kafkaClient.getBrokerInfo)
     })
   }
 
