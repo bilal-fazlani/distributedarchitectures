@@ -17,6 +17,8 @@ object Dependencies {
     Libs.`googleGuava`,
     Libs.`jamm`,
     Libs.`pcj`,
+    Libs.`borer-core`,
+    Libs.`borer-derivation`,
     Libs.`scalaTest` % Test,
     Libs.`mockito` % Test
   )

@@ -1,12 +1,13 @@
-package org.dist.simplekafka2
+package org.bilal.simplekafka2
 
 import org.I0Itec.zkclient.exception.ZkNodeExistsException
+import org.bilal.json.Codecs
 import org.dist.queue.server.Config
 import org.dist.queue.utils.ZkUtils.Broker
 import org.dist.simplekafka.PartitionReplicas
-import org.dist.simplekafka2.KafkaClient2.ControllerExists
+import org.bilal.simplekafka2.KafkaClient2.ControllerExists
 
-class KafkaClient2(zookeeperClient: ZookeeperClient2, config:Config) {
+class KafkaClient2(zookeeperClient: ZookeeperClient2, config:Config) extends Codecs{
   private val brokerIdsPath = "/brokers/ids"
   private val topicsPath = "/brokers/topics"
   private val controllerPath = "/controller"
@@ -30,12 +31,12 @@ class KafkaClient2(zookeeperClient: ZookeeperClient2, config:Config) {
 
   def getBrokerInfo(id:Int): Broker = zookeeperClient.readData[Broker](getBrokerPath(id))
 
-  def getPartitionAssignmentsForTopic(name:String):Set[PartitionReplicas] = zookeeperClient.readData(getTopicPath(name))
+  def getPartitionAssignmentsForTopic(name:String):Set[PartitionReplicas] = zookeeperClient.readData[Set[PartitionReplicas]](getTopicPath(name))
 
-  def subscribeToTopicChanges(handler: List[String] => Unit): List[String] =
+  def subscribeToTopicChanges(handler: Set[String] => Unit): Set[String] =
       zookeeperClient.subscribeChildChanges(topicsPath)(handler)
 
-  def subscribeToBrokerChanges(handler: List[Int] => Unit): List[String] =
+  def subscribeToBrokerChanges(handler: Set[Int] => Unit): Set[String] =
     zookeeperClient.subscribeChildChanges(brokerIdsPath)(x => handler(x.map(_.toInt)))
 
   def tryToBeController(id:String): Either[Unit, ControllerExists] = {
@@ -45,7 +46,7 @@ class KafkaClient2(zookeeperClient: ZookeeperClient2, config:Config) {
     }
     catch {
       case _: ZkNodeExistsException =>
-        val controllerId = zookeeperClient.readData(controllerPath)
+        val controllerId = zookeeperClient.readData[String](controllerPath)
         Right(ControllerExists(controllerId))
     }
   }

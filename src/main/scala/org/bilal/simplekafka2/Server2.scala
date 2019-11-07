@@ -1,4 +1,4 @@
-package org.dist.simplekafka2
+package org.bilal.simplekafka2
 
 class Server2(kafkaClient: KafkaClient2, controller: Controller2) {
   def start(): Unit = {
