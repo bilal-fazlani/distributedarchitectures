@@ -8,12 +8,12 @@ import org.dist.simplekafka2.KafkaClient2.ControllerExists
 class Controller2(brokerId:Int, kafkaClient: KafkaClient2) {
 
   var liveBrokers: Set[Broker] = Set()
-  var currentLeader: Int = -1
+  var currentController: Int = -1
 
   def startup(): Unit = {
     kafkaClient.subscriberControllerChanges {
       case Some(newController) =>
-        currentLeader = newController.toInt
+        currentController = newController.toInt
       case None =>
         elect()
     }
@@ -23,10 +23,10 @@ class Controller2(brokerId:Int, kafkaClient: KafkaClient2) {
   def elect(): Unit = {
     kafkaClient.tryToBeController(brokerId.toString) match {
       case Left(_) =>
-        currentLeader = brokerId
+        currentController = brokerId
         onBecomingLeader()
       case Right(ControllerExists(controllerId)) =>
-        currentLeader = controllerId.toInt
+        currentController = controllerId.toInt
     }
   }
 

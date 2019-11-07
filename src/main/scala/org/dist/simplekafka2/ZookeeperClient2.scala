@@ -10,6 +10,7 @@ import org.dist.kvstore.JsonSerDes
 import scala.jdk.CollectionConverters._
 import scala.reflect.ClassTag
 class ZookeeperClient2(zkClient: ZkClient) {
+  def shutdown(): Unit = zkClient.close()
 
   def readData[T](path:String)(implicit ct: ClassTag[T]):T = decode(zkClient.readData(path))
 
