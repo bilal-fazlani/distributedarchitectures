@@ -3,9 +3,10 @@ package org.dist.simplekafka2
 
 import java.util
 
-import org.I0Itec.zkclient.{IZkChildListener, ZkClient}
 import org.I0Itec.zkclient.exception.ZkNoNodeException
+import org.I0Itec.zkclient.{IZkDataListener, ZkClient}
 import org.dist.kvstore.JsonSerDes
+
 import scala.jdk.CollectionConverters._
 import scala.reflect.ClassTag
 class ZookeeperClient2(zkClient: ZkClient) {
@@ -41,6 +42,19 @@ class ZookeeperClient2(zkClient: ZkClient) {
       handler(currentChilds.asScala.toList)
     })
     result.asScala.toList
+  }
+
+  def subscriberDataChanges[T](path:String)(onChange: Option[T] => Unit): Unit = {
+    zkClient.subscribeDataChanges(path, new IZkDataListener {
+      override def handleDataChange(dataPath: String, data: Any): Unit = {
+        val newControllerId = readData(dataPath)
+        onChange(Some(newControllerId))
+      }
+
+      override def handleDataDeleted(dataPath: String): Unit = {
+        onChange(None)
+      }
+    })
   }
 
   @scala.annotation.tailrec
