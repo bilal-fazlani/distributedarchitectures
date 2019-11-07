@@ -16,11 +16,11 @@ class BrokerChangeListener(controller:Controller, zookeeperClient:ZookeeperClien
 
       val curBrokerIds = currentBrokerList.asScala.map(_.toInt).toSet
       val newBrokerIds = curBrokerIds -- controller.liveBrokers.map(broker  => broker.id)
-      val newBrokers = newBrokerIds.map(zookeeperClient.getBrokerInfo(_))
+      val newBrokers = newBrokerIds.map(zookeeperClient.getBrokerInfo)
 
-      newBrokers.foreach(controller.addBroker(_))
+      newBrokers.foreach(controller.addBroker)
 
-      if (newBrokerIds.size > 0)
+      if (newBrokerIds.nonEmpty)
         controller.onBrokerStartup(newBrokerIds.toSeq)
 
     } catch {

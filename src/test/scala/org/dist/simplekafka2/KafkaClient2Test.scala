@@ -31,6 +31,7 @@ class KafkaClient2Test extends ZookeeperTestHarness with Matchers{
     client.registerBroker(Broker(3, "localhost3", 8000))
     client.createTopic("topic1", 2, 2)
     val data: Set[PartitionReplicas] = zooKeeperClient.readData[Set[PartitionReplicas]]("/brokers/topics/topic1")
+    data.foreach(println)
     println(data)
   }
 }
