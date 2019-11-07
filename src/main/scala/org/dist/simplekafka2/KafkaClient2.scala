@@ -1,11 +1,14 @@
 package org.dist.simplekafka2
 
+import org.I0Itec.zkclient.exception.ZkNodeExistsException
 import org.dist.queue.utils.ZkUtils.Broker
-import org.dist.simplekafka.PartitionReplicas
+import org.dist.simplekafka.{ControllerExistsException, PartitionReplicas}
+import org.dist.simplekafka2.KafkaClient2.ControllerExists
 
 class KafkaClient2(zookeeperClient: ZookeeperClient2) {
   private val brokerIdsPath = "/brokers/ids"
   private val topicsPath = "/brokers/topics"
+  private val controllerPath = "/controller"
 
   private def getTopicPath(name: String): String = s"$topicsPath/$name"
   private def getBrokerPath(id: Int): String = s"$brokerIdsPath/$id"
@@ -38,6 +41,21 @@ class KafkaClient2(zookeeperClient: ZookeeperClient2) {
   def subscribeToBrokerChanges(handler: List[Int] => Unit): List[String] =
     zookeeperClient.subscribeChildChanges(brokerIdsPath)(x => handler(x.map(_.toInt)))
 
+  def tryToBeController(id:String): Either[Unit, ControllerExists] = {
+    try{
+      zookeeperClient.createEphemeralPath(controllerPath, id)
+      Left(())
+    }
+    catch {
+      case _: ZkNodeExistsException =>
+        val controllerId = zookeeperClient.readData(controllerPath)
+        Right(ControllerExists(controllerId))
+    }
+  }
+
+  def subscriberControllerChanges(onChange: Option[String] => Unit): Unit =
+    zookeeperClient.subscriberDataChanges(controllerPath)(onChange)
+
   private def createPartitionReplicasForBrokers(brokers: Set[Int], noOfPartitions:Int, replicationFactor:Int):Set[PartitionReplicas] = {
     val numberOfBrokers: Int = brokers.size
 
@@ -58,4 +76,8 @@ class KafkaClient2(zookeeperClient: ZookeeperClient2) {
     })
     partitionReplicas
   }
+}
+
+case object KafkaClient2{
+  case class ControllerExists(controllerId:String)
 }

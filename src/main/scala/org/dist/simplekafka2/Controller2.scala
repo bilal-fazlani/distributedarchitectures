@@ -3,10 +3,32 @@ package org.dist.simplekafka2
 import org.dist.queue.common.TopicAndPartition
 import org.dist.queue.utils.ZkUtils.Broker
 import org.dist.simplekafka.{LeaderAndReplicas, PartitionInfo, PartitionReplicas}
+import org.dist.simplekafka2.KafkaClient2.ControllerExists
 
-class Controller2(zookeeperClient: ZookeeperClient2, kafkaClient: KafkaClient2) {
+class Controller2(brokerId:Int, kafkaClient: KafkaClient2) {
 
   var liveBrokers: Set[Broker] = Set()
+  var currentLeader: Int = -1
+
+  def startup(): Unit = {
+    kafkaClient.subscriberControllerChanges {
+      case Some(newController) =>
+        currentLeader = newController.toInt
+      case None =>
+        elect()
+    }
+    elect()
+  }
+
+  def elect(): Unit = {
+    kafkaClient.tryToBeController(brokerId.toString) match {
+      case Left(_) =>
+        currentLeader = brokerId
+        onBecomingLeader()
+      case Right(ControllerExists(controllerId)) =>
+        currentLeader = controllerId.toInt
+    }
+  }
 
   def onBecomingLeader():Unit = {
     liveBrokers = liveBrokers ++ kafkaClient.allBrokers
@@ -32,7 +54,7 @@ class Controller2(zookeeperClient: ZookeeperClient2, kafkaClient: KafkaClient2) 
     })
   }
 
-  private def getBroker(brokerId:Int) = {
+  private def getBroker(brokerId:Int): Broker = {
     liveBrokers.find(b ⇒ b.id == brokerId).get
   }
 }
