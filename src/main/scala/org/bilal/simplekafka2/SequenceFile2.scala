@@ -26,7 +26,7 @@ class SequenceFile2(fileName: URI) {
 
   def appendMessage[T:Encoder](key:Key, message:T): Offset = {
     try{
-      val bytes = Serde.encodeToBytes(message)
+      val bytes = Serde.encode(message)
       if(key == null) throw new RuntimeException("key can not be null")
       if(message == null) throw new RuntimeException("message can not be null")
 
