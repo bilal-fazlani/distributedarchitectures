@@ -5,7 +5,7 @@ import java.net.URI
 import java.util.concurrent.atomic.AtomicLong
 
 import io.bullet.borer.{Codec, Encoder}
-import org.bilal.json.Serde
+import org.bilal.codec.Serde
 import org.bilal.simplekafka2.Partition2.Record
 import org.bilal.simplekafka2.SequenceFile2.{Key, Offset, Position}
 

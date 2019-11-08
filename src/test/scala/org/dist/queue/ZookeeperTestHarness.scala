@@ -1,6 +1,7 @@
 package org.dist.queue
 
 import org.I0Itec.zkclient.ZkClient
+import org.I0Itec.zkclient.serialize.BytesPushThroughSerializer
 import org.dist.queue.utils.ZKStringSerializer
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach, FunSuite}
 
@@ -17,7 +18,7 @@ trait ZookeeperTestHarness extends FunSuite with BeforeAndAfterEach {
 
   override def beforeEach() = {
     zookeeper = new EmbeddedZookeeper(zkConnect)
-    zkClient = new ZkClient(zookeeper.connectString, zkSessionTimeout, zkConnectionTimeout, ZKStringSerializer)
+    zkClient = new ZkClient(zookeeper.connectString, zkSessionTimeout, zkConnectionTimeout, new BytesPushThroughSerializer())
   }
 
   override def afterEach() = {

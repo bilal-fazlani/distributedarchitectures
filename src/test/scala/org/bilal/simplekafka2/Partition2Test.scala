@@ -1,6 +1,6 @@
 package org.bilal.simplekafka2
 
-import org.bilal.json.Codecs
+import org.bilal.codec.Codecs
 import org.bilal.simplekafka2.Partition2.Record
 import org.dist.queue.common.TopicAndPartition
 import org.dist.queue.server.Config

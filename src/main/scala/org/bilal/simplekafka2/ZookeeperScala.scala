@@ -6,7 +6,7 @@ import java.util
 import io.bullet.borer.Codec
 import org.I0Itec.zkclient.exception.ZkNoNodeException
 import org.I0Itec.zkclient.{IZkDataListener, ZkClient}
-import org.bilal.json.{Codecs, Serde}
+import org.bilal.codec.{Codecs, Serde}
 
 import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
@@ -15,7 +15,7 @@ class ZookeeperScala(zkClient: ZkClient) extends Codecs{
   def shutdown(): Unit = zkClient.close()
 
   def readData[T:Codec](path:String):T =
-    Serde.decode[T](zkClient.readData[String](path).getBytes())
+    Serde.decode[T](zkClient.readData[Array[Byte]](path))
 
   def allChildren(path:String): Set[Int] = {
       try {
@@ -48,7 +48,7 @@ class ZookeeperScala(zkClient: ZkClient) extends Codecs{
     }
   }
 
-  def createPersistantPath[T:Codec](path:String, data:T): Unit =
+  def createPersistentPath[T:Codec](path:String, data:T): Unit =
     {
       try{
         zkClient.createEphemeral(path, Serde.encode(data))
@@ -56,7 +56,7 @@ class ZookeeperScala(zkClient: ZkClient) extends Codecs{
       catch {
         case _: ZkNoNodeException =>
           createParent(getParent(path))
-          createPersistantPath(path, data)
+          createPersistentPath(path, data)
       }
     }
 

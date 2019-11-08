@@ -1,5 +1,7 @@
 package org.bilal.simplekafka2
 
+import org.bilal.codec.Codecs
+import org.bilal.remote.SimpleSocketServer2
 import org.dist.kvstore.InetAddressAndPort
 import org.dist.queue.common.TopicAndPartition
 import org.dist.queue.server.Config
@@ -7,10 +9,13 @@ import org.dist.queue.{TestUtils, ZookeeperTestHarness}
 import org.dist.simplekafka.PartitionInfo
 import org.dist.util.Networks
 import org.scalatest.{FunSuite, Matchers}
+import org.scalatestplus.mockito.MockitoSugar
 
 class ProducerConsumerTest
     extends FunSuite
     with Matchers
+    with MockitoSugar
+    with Codecs
     with ZookeeperTestHarness {
 
   test("should produce and consumer messages from five broker cluster") {
@@ -54,12 +59,16 @@ class ProducerConsumerTest
   }
 
   private def newBroker(brokerId: Int): Server2 = {
-    val config = Config(brokerId, new Networks().hostname(), TestUtils.choosePort(), zkConnect, List(TestUtils.tempDir().getAbsolutePath))
+    val networks = new Networks()
+    val host = networks.hostname()
+    val port = TestUtils.choosePort()
+    val config = Config(brokerId, host, port, zkConnect, List(TestUtils.tempDir().getAbsolutePath))
     val zookeeperScala = new ZookeeperScala(zkClient)
     val kafkaZookeeper: KafkaZookeeper = new KafkaZookeeper(zookeeperScala, config)
     val replicaManager = new ReplicaManager2(config)
-//    val socketServer1 = new SimpleSocketServer(config.brokerId, config.hostName, config.port, new SimpleKafkaApi2(config, replicaManager))
-    val controller = new Controller2(config.brokerId, kafkaZookeeper)
+    val kafkaApi = new SimpleKafkaApi2(config, replicaManager)
+    val socketServer = new SimpleSocketServer2(kafkaApi.handle)
+    val controller = new Controller2(config.brokerId, kafkaZookeeper, socketServer)
     new Server2(kafkaZookeeper, controller)
   }
 }

@@ -36,7 +36,7 @@ class ZookeeperScalaTest
   }
 
   test("test CreatePersistantPathWithData") {
-    zookeeperScala.createPersistantPath("/abc", TestClass(42))
+    zookeeperScala.createPersistentPath("/abc", TestClass(42))
     zkClient.exists("/abc") shouldBe true
     zookeeperScala.readData[TestClass]("/abc") should ===(TestClass(42))
   }
@@ -55,7 +55,7 @@ class ZookeeperScalaTest
       case None          =>
     }
 
-    zookeeperScala.createPersistantPath("/root/node1", TestClass(7))
+    zookeeperScala.createPersistentPath("/root/node1", TestClass(7))
 
     eventually {
       testData should ===(Some(TestClass(7)))

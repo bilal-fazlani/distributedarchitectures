@@ -1,4 +1,4 @@
-package org.bilal.json
+package org.bilal.codec
 
 import io.bullet.borer.{Cbor, Decoder, Encoder, Target}
 

@@ -1,7 +1,7 @@
 package org.bilal.simplekafka2
 
 import org.I0Itec.zkclient.exception.ZkNodeExistsException
-import org.bilal.json.Codecs
+import org.bilal.codec.Codecs
 import org.bilal.simplekafka2.KafkaZookeeper.ControllerExists
 import org.dist.queue.server.Config
 import org.dist.queue.utils.ZkUtils.Broker
@@ -34,7 +34,7 @@ class KafkaZookeeper(zookeeperScala: ZookeeperScala, val config: Config)
         noOfPartitions,
         replicationFactor
       )
-    zookeeperScala.createPersistantPath(getTopicPath(name), partitionReplicas)
+    zookeeperScala.createPersistentPath(getTopicPath(name), partitionReplicas)
   }
 
   private def getTopicPath(name: String): String = s"$topicsPath/$name"
