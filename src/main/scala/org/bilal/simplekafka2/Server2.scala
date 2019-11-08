@@ -1,11 +1,11 @@
 package org.bilal.simplekafka2
 
-class Server2(kafkaClient: KafkaZookeeper, controller: Controller2) {
+class Server2(val kafkaZookeeper: KafkaZookeeper, val controller: Controller2) {
   def start(): Unit = {
-    kafkaClient.registerSelf()
+    kafkaZookeeper.registerSelf()
     controller.start()
   }
   def shutdown(): Unit = {
-    kafkaClient.shutdown()
+    kafkaZookeeper.shutdown()
   }
 }

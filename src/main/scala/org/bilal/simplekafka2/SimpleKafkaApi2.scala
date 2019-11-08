@@ -48,8 +48,8 @@ class SimpleKafkaApi2(config:Config, replicaManager: ReplicaManager2) extends Co
       case RequestKeys.FetchKey => {
         val consumeRequest = Serde.decode[ConsumeRequest](request.messageBodyJson)
         val partition = replicaManager.getPartition(consumeRequest.topicAndPartition)
-        val rows = partition.read[String](consumeRequest.offset)
-        val consumeResponse = ConsumeResponse(rows.map(row => (row.key, row.value)).toMap)
+        val records = partition.read[String](consumeRequest.offset)
+        val consumeResponse = ConsumeResponse(records.map(record => (record.key, record.value)).toMap)
         RequestOrResponse(RequestKeys.FetchKey, Serde.encodeToString(consumeResponse), request.correlationId)
       }
       case _ => RequestOrResponse(0, "Unknown Request", request.correlationId)
