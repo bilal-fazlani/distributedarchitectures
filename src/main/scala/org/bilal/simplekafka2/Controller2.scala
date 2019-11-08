@@ -1,5 +1,6 @@
 package org.bilal.simplekafka2
 
+import org.bilal.api.{Request2, Response2}
 import org.bilal.api.Request2.{LeaderAndReplica, UpdateMetadata}
 import org.bilal.remote.SimpleSocketServer2
 import org.bilal.simplekafka2.KafkaZookeeper.ControllerExists
@@ -9,7 +10,7 @@ import org.dist.simplekafka.{LeaderAndReplicas, PartitionInfo, PartitionReplicas
 
 import scala.collection.mutable
 
-class Controller2(brokerId:Int, kafkaZookeeper: KafkaZookeeper, socketServer: SimpleSocketServer2) {
+class Controller2(brokerId:Int, kafkaZookeeper: KafkaZookeeper, socketServer: SimpleSocketServer2[Request2, Response2]) {
   var liveBrokers: Set[Broker] = Set()
   var currentController: Int = -1
 
