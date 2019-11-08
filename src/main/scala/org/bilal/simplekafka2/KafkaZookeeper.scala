@@ -7,7 +7,7 @@ import org.dist.queue.server.Config
 import org.dist.queue.utils.ZkUtils.Broker
 import org.dist.simplekafka.PartitionReplicas
 
-class KafkaZookeeper(zookeeperScala: ZookeeperScala, config: Config)
+class KafkaZookeeper(zookeeperScala: ZookeeperScala, val config: Config)
     extends Codecs {
   private val brokerIdsPath = "/brokers/ids"
   private val topicsPath = "/brokers/topics"
