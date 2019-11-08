@@ -6,7 +6,9 @@ import java.net.Socket
 import io.bullet.borer.Codec
 import org.bilal.codec.{Codecs, Serde}
 
-class SocketIO2[Req: Codec, Res: Codec](socket: Socket) extends Codecs {
+import scala.util.Using
+
+class TcpClient[Req: Codec, Res: Codec](socket: Socket) extends Codecs {
   socket.setSoTimeout(5000)
 
   def readHandleWithSocket(handler: (Req, Socket) => Unit): Unit = {
@@ -53,5 +55,13 @@ class SocketIO2[Req: Codec, Res: Codec](socket: Socket) extends Codecs {
     val responseBytes = new Array[Byte](size)
     dataInputStream.read(responseBytes)
     responseBytes
+  }
+}
+object TcpClient{
+  def sendReceiveTcp[A:Codec,B:Codec](request: A, to: (String, Int)): B = {
+    Using.resource(new Socket(to._1, to._2)) { targetMachineSocket =>
+      new TcpClient[A, B](targetMachineSocket)
+        .requestResponse(request)
+    }
   }
 }

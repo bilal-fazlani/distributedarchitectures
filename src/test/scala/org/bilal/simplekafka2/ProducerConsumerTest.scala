@@ -1,7 +1,8 @@
 package org.bilal.simplekafka2
 
+import org.bilal.api.{Request2, Response2}
 import org.bilal.codec.Codecs
-import org.bilal.remote.SimpleSocketServer2
+import org.bilal.remote.TcpServer
 import org.dist.kvstore.InetAddressAndPort
 import org.dist.queue.common.TopicAndPartition
 import org.dist.queue.server.Config
@@ -49,6 +50,7 @@ class ProducerConsumerTest
   }
 
   private def leaderCache(broker: Server2): Map[TopicAndPartition, PartitionInfo] = {
+    broker.kafkaZookeeper
 //    broker.socketServer.kafkaApis.leaderCache
     ???
   }
@@ -67,8 +69,8 @@ class ProducerConsumerTest
     val kafkaZookeeper: KafkaZookeeper = new KafkaZookeeper(zookeeperScala, config)
     val replicaManager = new ReplicaManager2(config)
     val kafkaApi = new SimpleKafkaApi2(config, replicaManager)
-    val socketServer = new SimpleSocketServer2(kafkaApi.handle)
-    val controller = new Controller2(config.brokerId, kafkaZookeeper, socketServer)
-    new Server2(kafkaZookeeper, controller)
+    val controller = new Controller2(config.brokerId, kafkaZookeeper)
+    val tcpServer = new TcpServer[Request2, Response2](kafkaApi.handle, port)
+    new Server2(kafkaZookeeper, controller, tcpServer)
   }
 }

@@ -1,8 +1,6 @@
 package org.bilal.simplekafka2
 
-import org.bilal.api.{Request2, Response2}
 import org.bilal.codec.Codecs
-import org.bilal.remote.SimpleSocketServer2
 import org.dist.queue.server.Config
 import org.dist.queue.{TestUtils, ZookeeperTestHarness}
 import org.scalatest.concurrent.Eventually
@@ -18,7 +16,6 @@ class Controller2Test extends ZookeeperTestHarness
 {
 
   private var zookeeperScala: ZookeeperScala = _
-  private val socketServer: SimpleSocketServer2[Request2, Response2] = mock
   private def kafkaZookeeper(brokerId:Int): KafkaZookeeper = new KafkaZookeeper(
     zookeeperScala,
     Config(
@@ -36,7 +33,7 @@ class Controller2Test extends ZookeeperTestHarness
   }
 
   test("should start the controller") {
-    val controller:Controller2 = new Controller2(10, kafkaZookeeper(10), socketServer)
+    val controller:Controller2 = new Controller2(10, kafkaZookeeper(10))
     controller.currentController should ===(-1)
     controller.start()
     eventually{
@@ -45,8 +42,8 @@ class Controller2Test extends ZookeeperTestHarness
   }
 
   test("when current controller is deleted, it re-elect itself") {
-    val controller20:Controller2 = new Controller2(20, kafkaZookeeper(20),socketServer)
-    val controller30:Controller2 = new Controller2(30, kafkaZookeeper(30),socketServer)
+    val controller20:Controller2 = new Controller2(20, kafkaZookeeper(20))
+    val controller30:Controller2 = new Controller2(30, kafkaZookeeper(30))
     controller20.currentController should ===(-1)
     controller30.currentController should ===(-1)
     controller20.start()

@@ -7,7 +7,7 @@ import org.bilal.codec.Codecs
 
 import scala.util.control.NonFatal
 
-class TcpListener2[A:Codec, B:Codec](requestHandler: A => B, selfPort:Int)
+class TcpServer[A:Codec, B:Codec](requestHandler: A => B, val port:Int)
     extends Thread
     with Codecs {
 
@@ -22,10 +22,10 @@ class TcpListener2[A:Codec, B:Codec](requestHandler: A => B, selfPort:Int)
 
   override def run(): Unit = {
     try {
-      serverSocket.bind(new InetSocketAddress(selfPort))
+      serverSocket.bind(new InetSocketAddress(port))
       while (true) {
         val socket = serverSocket.accept()
-        new SocketIO2[A, B](socket)
+        new TcpClient[A, B](socket)
           .readHandleRespond(request => requestHandler(request))
       }
     } catch {

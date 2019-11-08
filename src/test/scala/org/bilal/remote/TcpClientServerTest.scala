@@ -8,7 +8,7 @@ import org.mockito.MockitoSugar
 import org.scalatest.concurrent.Eventually
 import org.scalatest.{FunSuite, Matchers}
 
-class SimpleSocketServer2Test
+class TcpClientServerTest
     extends FunSuite
     with Matchers
     with Codecs
@@ -16,16 +16,16 @@ class SimpleSocketServer2Test
     with ZookeeperTestHarness
     with MockitoSugar {
 
-  test("should send message and receive response then shutdown"){
+  test("should send message and receive response"){
     val handler1 = (request:String) => request.toUpperCase
 
-    val port1 = 5676
-    val socketServer1 = new SimpleSocketServer2[String,String](port1,handler1)
+    val port = 5676
+    val server = new TcpServer[String,String](handler1, port)
 
-    socketServer1.start()
+    server.start()
 
     val send: String => String =
-      socketServer1.sendReceiveTcp(_, ("localhost", port1))
+      TcpClient.sendReceiveTcp[String,String](_, ("localhost", port))
 
     val x = send("hello")
     println(x)
@@ -35,7 +35,7 @@ class SimpleSocketServer2Test
     println(y)
     y should ===("WORLD")
 
-    socketServer1.shutdown()
+    server.shutdown()
 
     val error = intercept[ConnectException]{
       send("xyz")
