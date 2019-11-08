@@ -1,5 +1,7 @@
 package org.bilal.simplekafka2
 
+import org.bilal.api2.Request2._
+import org.bilal.api2.Response2._
 import org.bilal.api2._
 import org.bilal.json.Codecs
 import org.dist.queue.common.TopicAndPartition
@@ -19,6 +21,12 @@ class SimpleKafkaApi2(config: Config, replicaManager: ReplicaManager2)
         val partition = replicaManager.getPartition(topicAndPartition)
         val offset = partition.appendMessage(key, message)
         ProduceResponse2(correlationId, offset)
+      case Consume2(correlationId, topicAndPartition, offset) =>
+        val partition =
+          replicaManager.getPartition(topicAndPartition)
+        val records = partition.read[String](offset)
+        val data = records.map(record => (record.key, record.value)).toMap
+        ConsumeResponse2(correlationId, data)
       case LeaderAndReplica(correlationId, leaderReplicas) =>
         leaderReplicas.foreach(x => {
           val leader = x.partitionStateInfo.leader
@@ -41,12 +49,6 @@ class SimpleKafkaApi2(config: Config, replicaManager: ReplicaManager2)
         val partitionInfo: Map[TopicAndPartition, PartitionInfo] =
           topicAndPartitions.map(tp => (tp, leaderCache(tp))).toMap
         GetTopicMetadataResponse2(correlationId, partitionInfo)
-      case ConsumeRequest2(correlationId, topicAndPartition, offset) =>
-        val partition =
-          replicaManager.getPartition(topicAndPartition)
-        val records = partition.read[String](offset)
-        val data = records.map(record => (record.key, record.value)).toMap
-      ConsumeResponse2(correlationId, data)
     }
   }
 }
