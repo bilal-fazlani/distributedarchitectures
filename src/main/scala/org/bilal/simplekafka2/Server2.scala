@@ -14,5 +14,6 @@ class Server2(val kafkaZookeeper: KafkaZookeeper,
   }
   def shutdown(): Unit = {
     kafkaZookeeper.shutdown()
+    tcpServer.shutdown()
   }
 }
