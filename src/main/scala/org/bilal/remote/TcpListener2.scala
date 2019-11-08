@@ -3,16 +3,13 @@ package org.bilal.remote
 import java.net.{InetSocketAddress, ServerSocket}
 import java.util.concurrent.atomic.AtomicBoolean
 
-import org.bilal.api2.{Request2, Response2}
-import org.bilal.json.Codecs
-import org.bilal.simplekafka2.SimpleKafkaApi2
-import org.dist.kvstore.InetAddressAndPort
+import org.bilal.api.{Request2, Response2}
+import org.bilal.codec.Codecs
+import org.bilal.remote.TcpListener2.RequestHandler
 
 import scala.util.control.NonFatal
 
-class TcpListener2(localEp: InetAddressAndPort,
-                   kafkaApis: SimpleKafkaApi2,
-                   socketServer: SimpleSocketServer2)
+class TcpListener2(requestHandler: RequestHandler)
     extends Thread
     with Codecs {
   val isRunning = new AtomicBoolean(true)
@@ -28,11 +25,11 @@ class TcpListener2(localEp: InetAddressAndPort,
   override def run(): Unit = {
     try {
       serverSocket = new ServerSocket()
-      serverSocket.bind(new InetSocketAddress(localEp.address, localEp.port))
+      serverSocket.bind(new InetSocketAddress(0))
       while (true) {
         val socket = serverSocket.accept()
         new SocketIO2[Request2, Response2](socket)
-          .readHandleRespond(request => kafkaApis.handle(request))
+          .readHandleRespond(request => requestHandler(request))
       }
     } catch {
       case NonFatal(err) =>
@@ -42,4 +39,7 @@ class TcpListener2(localEp: InetAddressAndPort,
       serverSocket.close()
     }
   }
+}
+object TcpListener2{
+  type RequestHandler = Request2 => Response2
 }

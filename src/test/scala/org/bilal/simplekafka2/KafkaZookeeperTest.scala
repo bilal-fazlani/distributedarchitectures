@@ -1,6 +1,6 @@
 package org.bilal.simplekafka2
 
-import org.bilal.json.Codecs
+import org.bilal.codec.Codecs
 import org.bilal.simplekafka2.KafkaZookeeper.ControllerExists
 import org.dist.queue.server.Config
 import org.dist.queue.utils.ZkUtils.Broker

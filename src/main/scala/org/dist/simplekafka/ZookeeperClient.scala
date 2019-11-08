@@ -3,6 +3,7 @@ package org.dist.simplekafka
 import com.fasterxml.jackson.core.`type`.TypeReference
 import com.google.common.annotations.VisibleForTesting
 import org.I0Itec.zkclient.exception.{ZkNoNodeException, ZkNodeExistsException}
+import org.I0Itec.zkclient.serialize.BytesPushThroughSerializer
 import org.I0Itec.zkclient.{IZkChildListener, IZkDataListener, IZkStateListener, ZkClient}
 import org.apache.zookeeper.Watcher.Event.KeeperState
 import org.dist.kvstore.JsonSerDes
@@ -38,7 +39,7 @@ private[simplekafka] class ZookeeperClientImpl(config:Config) extends ZookeeperC
   val ControllerPath = "/controller"
 
 
-  private val zkClient = new ZkClient(config.zkConnect, config.zkSessionTimeoutMs, config.zkConnectionTimeoutMs, ZKStringSerializer)
+  private val zkClient = new ZkClient(config.zkConnect, config.zkSessionTimeoutMs, config.zkConnectionTimeoutMs, new BytesPushThroughSerializer())
   zkClient.subscribeStateChanges(new SessionExpireListener)
 
   override def setPartitionReplicasForTopic(topicName: String, partitionReplicas: Set[PartitionReplicas]) = {

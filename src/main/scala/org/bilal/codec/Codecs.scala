@@ -1,10 +1,10 @@
-package org.bilal.json
+package org.bilal.codec
 
 import io.bullet.borer.Codec
 import io.bullet.borer.derivation.MapBasedCodecs._
-import org.bilal.api2.Request2.{Consume2, GetTopicMetadata2, LeaderAndReplica, Produce, UpdateMetadata}
-import org.bilal.api2.Response2.{ConsumeResponse2, GetTopicMetadataResponse2, LeaderAndReplicaResponse2, ProduceResponse2, UpdateMetadataResponse2}
-import org.bilal.api2.{Request2, Response2}
+import org.bilal.api.Request2.{Consume2, GetTopicMetadata2, LeaderAndReplica, Produce, UpdateMetadata}
+import org.bilal.api.Response2.{ConsumeResponse2, GetTopicMetadataResponse2, LeaderAndReplicaResponse2, ProduceResponse2, UpdateMetadataResponse2}
+import org.bilal.api.{Request2, Response2}
 import org.bilal.simplekafka2.Partition2.Record
 import org.bilal.simplekafka2.SequenceFile2.Offset
 import org.dist.queue.common.TopicAndPartition

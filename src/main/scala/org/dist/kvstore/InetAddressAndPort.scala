@@ -10,6 +10,6 @@ object InetAddressAndPort {
 }
 
 case class InetAddressAndPort(address: InetAddress, port: Int) {
-  var defaultPort: Int = 7000
+  val defaultPort: Int = 7000
 }
 

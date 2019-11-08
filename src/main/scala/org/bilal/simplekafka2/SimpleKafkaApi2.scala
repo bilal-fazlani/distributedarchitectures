@@ -1,9 +1,9 @@
 package org.bilal.simplekafka2
 
-import org.bilal.api2.Request2._
-import org.bilal.api2.Response2._
-import org.bilal.api2._
-import org.bilal.json.Codecs
+import org.bilal.api.Request2._
+import org.bilal.api.Response2._
+import org.bilal.api._
+import org.bilal.codec.Codecs
 import org.dist.queue.common.TopicAndPartition
 import org.dist.queue.server.Config
 import org.dist.queue.utils.ZkUtils.Broker
@@ -17,17 +17,17 @@ class SimpleKafkaApi2(config: Config, replicaManager: ReplicaManager2)
 
   def handle(request: Request2): Response2 = {
     request match {
-      case Produce(correlationId, topicAndPartition, key, message) =>
+      case Produce(topicAndPartition, key, message, correlationId) =>
         val partition = replicaManager.getPartition(topicAndPartition)
         val offset = partition.appendMessage(key, message)
         ProduceResponse2(correlationId, offset)
-      case Consume2(correlationId, topicAndPartition, offset) =>
+      case Consume2(topicAndPartition, offset, correlationId) =>
         val partition =
           replicaManager.getPartition(topicAndPartition)
         val records = partition.read[String](offset)
         val data = records.map(record => (record.key, record.value)).toMap
         ConsumeResponse2(correlationId, data)
-      case LeaderAndReplica(correlationId, leaderReplicas) =>
+      case LeaderAndReplica(leaderReplicas, correlationId) =>
         leaderReplicas.foreach(x => {
           val leader = x.partitionStateInfo.leader
           val topicPartition = x.topicPartition
@@ -36,13 +36,13 @@ class SimpleKafkaApi2(config: Config, replicaManager: ReplicaManager2)
           else replicaManager.makeFollower(topicPartition, leader.id)
         })
         LeaderAndReplicaResponse2(correlationId)
-      case UpdateMetadata(correlationId, aliveBrokers, leaderReplicas) =>
+      case UpdateMetadata(aliveBrokers, leaderReplicas, correlationId) =>
         this.aliveBrokers = aliveBrokers
         leaderReplicas.foreach(leaderReplica => {
           leaderCache = leaderCache + (leaderReplica.topicPartition -> leaderReplica.partitionStateInfo)
         })
         UpdateMetadataResponse2(correlationId)
-      case GetTopicMetadata2(correlationId, topicName) =>
+      case GetTopicMetadata2(topicName, correlationId) =>
         val topicAndPartitions = leaderCache.keys.filter(
           topicAndPartition => topicAndPartition.topic == topicName
         )
