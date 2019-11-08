@@ -1,3 +1,3 @@
 package org.dist.simplekafka
 
-case class ProduceResponse(offset:Int)
+case class ProduceResponse(offset:Long)

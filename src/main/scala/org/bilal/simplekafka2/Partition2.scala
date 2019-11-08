@@ -27,5 +27,5 @@ class Partition2(config:Config, topicPartition: TopicAndPartition) {
   }
 }
 object Partition2{
-  case class Record[T:Codec](key:String, message:T)
+  case class Record[T:Codec](key:String, value:T)
 }
