@@ -4,7 +4,8 @@ import java.io.{File, IOException, RandomAccessFile}
 import java.net.URI
 import java.util.concurrent.atomic.AtomicLong
 
-import io.bullet.borer.{Codec, Decoder, Encoder, Json}
+import io.bullet.borer.{Codec, Encoder}
+import org.bilal.json.Serde
 import org.bilal.simplekafka2.Partition2.Record
 import org.bilal.simplekafka2.SequenceFile2.{Key, Offset, Position}
 
@@ -25,7 +26,7 @@ class SequenceFile2(fileName: URI) {
 
   def appendMessage[T:Encoder](key:Key, message:T): Offset = {
     try{
-      val bytes = Json.encode(message).to[Array[Byte]].result
+      val bytes = Serde.encodeToBytes(message)
       if(key == null) throw new RuntimeException("key can not be null")
       if(message == null) throw new RuntimeException("message can not be null")
 
@@ -58,7 +59,7 @@ class SequenceFile2(fileName: URI) {
       val length = file.readInt()
       var bytes = new Array[Byte](length)
       file.read(bytes, 0, length)
-      val message = Json.decode(bytes).to[T].value
+      val message = Serde.decode[T](bytes)
       Record(key, message)
     }
     catch {

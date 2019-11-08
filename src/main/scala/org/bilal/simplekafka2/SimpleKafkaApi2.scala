@@ -1,7 +1,7 @@
 package org.bilal.simplekafka2
 
 import io.bullet.borer.Json
-import org.bilal.json.Codecs
+import org.bilal.json.{Codecs, Serde}
 import org.dist.queue.api.{RequestKeys, RequestOrResponse}
 import org.dist.queue.server.Config
 import org.dist.simplekafka.LeaderAndReplicaRequest
@@ -10,7 +10,7 @@ class SimpleKafkaApi2(config:Config, replicaManager: ReplicaManager2) extends Co
   def handle(request: RequestOrResponse):RequestOrResponse ={
     request.requestId match {
       case RequestKeys.LeaderAndIsrKey =>
-        val leaderAndReplicasRequest = Json.decode(request.messageBodyJson.getBytes()).to[LeaderAndReplicaRequest].value
+        val leaderAndReplicasRequest = Serde.decode[LeaderAndReplicaRequest](request.messageBodyJson.getBytes())
         leaderAndReplicasRequest.leaderReplicas.foreach(x => {
           val leader = x.partitionStateInfo.leader
           val topicPartition = x.topicPartition
