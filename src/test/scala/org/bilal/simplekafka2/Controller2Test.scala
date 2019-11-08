@@ -12,9 +12,9 @@ class Controller2Test extends ZookeeperTestHarness
     with Eventually
     with BeforeAndAfterEach {
 
-  private var zooKeeperClient: ZookeeperClient2 = _
-  private def kafkaClient(brokerId:Int): KafkaClient2 = new KafkaClient2(
-    zooKeeperClient,
+  private var zookeeperScala: ZookeeperScala = _
+  private def kafkaZookeeper(brokerId:Int): KafkaZookeeper = new KafkaZookeeper(
+    zookeeperScala,
     Config(
       brokerId,
       "localhost",
@@ -26,11 +26,11 @@ class Controller2Test extends ZookeeperTestHarness
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    zooKeeperClient = new ZookeeperClient2(zkClient)
+    zookeeperScala = new ZookeeperScala(zkClient)
   }
 
   test("should start the controller") {
-    val controller:Controller2 = new Controller2(10, kafkaClient(10))
+    val controller:Controller2 = new Controller2(10, kafkaZookeeper(10))
     controller.currentController should ===(-1)
     controller.start()
     eventually{
@@ -39,8 +39,8 @@ class Controller2Test extends ZookeeperTestHarness
   }
 
   test("when current controller is deleted, it re-elect itself") {
-    val controller20:Controller2 = new Controller2(20, kafkaClient(20))
-    val controller30:Controller2 = new Controller2(30, kafkaClient(30))
+    val controller20:Controller2 = new Controller2(20, kafkaZookeeper(20))
+    val controller30:Controller2 = new Controller2(30, kafkaZookeeper(30))
     controller20.currentController should ===(-1)
     controller30.currentController should ===(-1)
     controller20.start()

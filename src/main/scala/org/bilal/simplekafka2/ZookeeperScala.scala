@@ -10,7 +10,7 @@ import org.bilal.json.Codecs
 
 import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
-class ZookeeperClient2(zkClient: ZkClient) extends Codecs{
+class ZookeeperScala(zkClient: ZkClient) extends Codecs{
 
   def shutdown(): Unit = zkClient.close()
 

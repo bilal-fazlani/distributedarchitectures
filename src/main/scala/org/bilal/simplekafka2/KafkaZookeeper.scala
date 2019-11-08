@@ -2,12 +2,12 @@ package org.bilal.simplekafka2
 
 import org.I0Itec.zkclient.exception.ZkNodeExistsException
 import org.bilal.json.Codecs
-import org.bilal.simplekafka2.KafkaClient2.ControllerExists
+import org.bilal.simplekafka2.KafkaZookeeper.ControllerExists
 import org.dist.queue.server.Config
 import org.dist.queue.utils.ZkUtils.Broker
 import org.dist.simplekafka.PartitionReplicas
 
-class KafkaClient2(zookeeperClient: ZookeeperClient2, config: Config)
+class KafkaZookeeper(zookeeperScala: ZookeeperScala, config: Config)
     extends Codecs {
   private val brokerIdsPath = "/brokers/ids"
   private val topicsPath = "/brokers/topics"
@@ -15,12 +15,12 @@ class KafkaClient2(zookeeperClient: ZookeeperClient2, config: Config)
   private val self = Broker(config.brokerId, config.hostName, config.port)
 
   def allBrokers(): Set[Broker] =
-    zookeeperClient
+    zookeeperScala
       .allChildren(brokerIdsPath)
       .map(getBrokerInfo)
 
   def getBrokerInfo(id: Int): Broker =
-    zookeeperClient.readData[Broker](getBrokerPath(id))
+    zookeeperScala.readData[Broker](getBrokerPath(id))
 
   private def getBrokerPath(id: Int): String = s"$brokerIdsPath/$id"
 
@@ -34,13 +34,13 @@ class KafkaClient2(zookeeperClient: ZookeeperClient2, config: Config)
         noOfPartitions,
         replicationFactor
       )
-    zookeeperClient.createPersistantPath(getTopicPath(name), partitionReplicas)
+    zookeeperScala.createPersistantPath(getTopicPath(name), partitionReplicas)
   }
 
   private def getTopicPath(name: String): String = s"$topicsPath/$name"
 
   def allBrokerIds(): Set[Int] =
-    zookeeperClient
+    zookeeperScala
       .allChildren(brokerIdsPath)
 
   private def createPartitionReplicasForBrokers(
@@ -69,29 +69,29 @@ class KafkaClient2(zookeeperClient: ZookeeperClient2, config: Config)
   }
 
   def getPartitionAssignmentsForTopic(name: String): Set[PartitionReplicas] =
-    zookeeperClient.readData[Set[PartitionReplicas]](getTopicPath(name))
+    zookeeperScala.readData[Set[PartitionReplicas]](getTopicPath(name))
 
   def subscribeToTopicChanges(handler: Set[String] => Unit): Set[String] =
-    zookeeperClient.subscribeChildChanges(topicsPath)(handler)
+    zookeeperScala.subscribeChildChanges(topicsPath)(handler)
 
   def subscribeToBrokerChanges(handler: Set[Int] => Unit): Set[String] =
-    zookeeperClient.subscribeChildChanges(brokerIdsPath)(
+    zookeeperScala.subscribeChildChanges(brokerIdsPath)(
       x => handler(x.map(_.toInt))
     )
 
   def tryToBeController(id: Int): Either[ControllerExists, Unit] = {
     try {
-      zookeeperClient.createEphemeralPath(controllerPath, id.toString)
+      zookeeperScala.createEphemeralPath(controllerPath, id.toString)
       Right(())
     } catch {
       case _: ZkNodeExistsException =>
-        val controllerId = zookeeperClient.readData[String](controllerPath)
+        val controllerId = zookeeperScala.readData[String](controllerPath)
         Left(ControllerExists(controllerId.toInt))
     }
   }
 
   def subscriberControllerChanges(onChange: Option[Int] => Unit): Unit =
-    zookeeperClient.subscriberDataChanges[String](controllerPath) {
+    zookeeperScala.subscriberDataChanges[String](controllerPath) {
       case Some(value) => onChange(Some(value.toInt))
       case None        => onChange(None)
     }
@@ -99,11 +99,11 @@ class KafkaClient2(zookeeperClient: ZookeeperClient2, config: Config)
   def registerSelf(): Unit = registerBroker(self)
 
   def registerBroker(broker: Broker): Unit =
-    zookeeperClient.createEphemeralPath(getBrokerPath(broker.id), broker)
+    zookeeperScala.createEphemeralPath(getBrokerPath(broker.id), broker)
 
-  def shutdown(): Unit = zookeeperClient.shutdown()
+  def shutdown(): Unit = zookeeperScala.shutdown()
 }
 
-case object KafkaClient2 {
+case object KafkaZookeeper {
   case class ControllerExists(controllerId: Int)
 }
