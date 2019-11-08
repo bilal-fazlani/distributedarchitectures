@@ -2,26 +2,29 @@ package org.bilal.remote
 
 import java.net.Socket
 
-import org.bilal.api.{Request2, Response2}
+import io.bullet.borer.Codec
 import org.bilal.codec.Codecs
-import org.bilal.remote.TcpListener2.RequestHandler
-import org.dist.kvstore.InetAddressAndPort
 
-class SimpleSocketServer2(val requestHandler: RequestHandler)
-    extends Codecs {
-  var tcpListener: TcpListener2 = _
+import scala.util.Using
+
+class SimpleSocketServer2[A: Codec, B: Codec](selfPort: Int, val requestHandler: A => B
+) extends Codecs {
+
+  def this(requestHandler: A => B) = this(0, requestHandler)
+
+  var tcpListener: TcpListener2[A, B] = _
 
   def start(): Unit = {
-    tcpListener =
-      new TcpListener2(requestHandler)
+    tcpListener = new TcpListener2(requestHandler, selfPort)
     tcpListener.start()
   }
 
   def shutdown(): Unit = tcpListener.shutdown()
 
-  def sendReceiveTcp(request: Request2, to: (String,Int)): Response2 = {
-    val clientSocket = new Socket(to._1, to._2)
-    new SocketIO2[Request2, Response2](clientSocket)
-      .requestResponse(request)
+  def sendReceiveTcp(request: A, to: (String, Int)): B = {
+    Using.resource(new Socket(to._1, to._2)){ socket =>
+      new SocketIO2[A, B](socket)
+        .requestResponse(request)
+    }
   }
 }

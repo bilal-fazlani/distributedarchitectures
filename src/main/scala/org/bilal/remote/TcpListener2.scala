@@ -1,19 +1,17 @@
 package org.bilal.remote
 
-import java.net.{InetSocketAddress, ServerSocket}
-import java.util.concurrent.atomic.AtomicBoolean
+import java.net.{InetSocketAddress, ServerSocket, SocketException}
 
-import org.bilal.api.{Request2, Response2}
+import io.bullet.borer.Codec
 import org.bilal.codec.Codecs
-import org.bilal.remote.TcpListener2.RequestHandler
 
 import scala.util.control.NonFatal
 
-class TcpListener2(requestHandler: RequestHandler)
+class TcpListener2[A:Codec, B:Codec](requestHandler: A => B, selfPort:Int)
     extends Thread
     with Codecs {
-  val isRunning = new AtomicBoolean(true)
-  var serverSocket: ServerSocket = _
+
+  val serverSocket: ServerSocket = new ServerSocket()
 
   def shutdown(): Unit =
     try {
@@ -24,22 +22,15 @@ class TcpListener2(requestHandler: RequestHandler)
 
   override def run(): Unit = {
     try {
-      serverSocket = new ServerSocket()
-      serverSocket.bind(new InetSocketAddress(0))
+      serverSocket.bind(new InetSocketAddress(selfPort))
       while (true) {
         val socket = serverSocket.accept()
-        new SocketIO2[Request2, Response2](socket)
+        new SocketIO2[A, B](socket)
           .readHandleRespond(request => requestHandler(request))
       }
     } catch {
-      case NonFatal(err) =>
-        err.printStackTrace()
-    }
-    finally {
-      serverSocket.close()
+      case NonFatal(err:SocketException) if err.getMessage == "Socket closed" =>
+      case NonFatal(err) => err.printStackTrace()
     }
   }
-}
-object TcpListener2{
-  type RequestHandler = Request2 => Response2
 }
