@@ -15,7 +15,7 @@ class ZookeeperScala(zkClient: ZkClient) extends Codecs{
   def shutdown(): Unit = zkClient.close()
 
   def readData[T:Codec](path:String):T =
-    Serde.decode[T](zkClient.readData[String](path))
+    Serde.decode[T](zkClient.readData[String](path).getBytes())
 
   def allChildren(path:String): Set[Int] = {
       try {
@@ -28,7 +28,7 @@ class ZookeeperScala(zkClient: ZkClient) extends Codecs{
 
   def createEphemeralPath[T:Codec](path:String, data:T): Unit ={
     try{
-      zkClient.createEphemeral(path, Serde.encodeToString(data))
+      zkClient.createEphemeral(path, Serde.encode(data))
     }
     catch {
       case _: ZkNoNodeException =>
@@ -51,7 +51,7 @@ class ZookeeperScala(zkClient: ZkClient) extends Codecs{
   def createPersistantPath[T:Codec](path:String, data:T): Unit =
     {
       try{
-        zkClient.createEphemeral(path, Serde.encodeToString(data))
+        zkClient.createEphemeral(path, Serde.encode(data))
       }
       catch {
         case _: ZkNoNodeException =>

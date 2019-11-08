@@ -1,10 +1,9 @@
 package org.bilal.json
 
-import io.bullet.borer.{Decoder, Encoder, Json}
+import io.bullet.borer.{Cbor, Decoder, Encoder, Target}
 
 object Serde extends Codecs {
-  def encodeToString[T:Encoder](value:T): String = Json.encode(value).toUtf8String
-  def encodeToBytes[T:Encoder](value:T): Array[Byte] = Json.encode(value).to[Array[Byte]].result
-  def decode[T:Decoder](text: String):T = Json.decode(text.getBytes()).to[T].value
-  def decode[T:Decoder](bytes: Array[Byte]):T = Json.decode(bytes).to[T].value
+  val protocol: Target = Cbor
+  def encode[T:Encoder](value:T): Array[Byte] = protocol.encode(value).to[Array[Byte]].result
+  def decode[T:Decoder](bytes: Array[Byte]):T = protocol.decode(bytes).to[T].value
 }
