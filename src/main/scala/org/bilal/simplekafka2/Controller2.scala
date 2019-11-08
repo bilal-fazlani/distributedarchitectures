@@ -3,9 +3,9 @@ package org.bilal.simplekafka2
 import org.dist.queue.common.TopicAndPartition
 import org.dist.queue.utils.ZkUtils.Broker
 import org.dist.simplekafka.{LeaderAndReplicas, PartitionInfo, PartitionReplicas}
-import org.bilal.simplekafka2.KafkaClient2.ControllerExists
+import org.bilal.simplekafka2.KafkaZookeeper.ControllerExists
 
-class Controller2(brokerId:Int, kafkaClient: KafkaClient2) {
+class Controller2(brokerId:Int, kafkaClient: KafkaZookeeper) {
   var liveBrokers: Set[Broker] = Set()
   var currentController: Int = -1
 
@@ -54,6 +54,6 @@ class Controller2(brokerId:Int, kafkaClient: KafkaClient2) {
   }
 
   private def getBroker(brokerId:Int): Broker = {
-    liveBrokers.find(b ⇒ b.id == brokerId).get
+    liveBrokers.find(b => b.id == brokerId).get
   }
 }
