@@ -36,7 +36,7 @@ class SimpleSocketServer(val brokerId: Int,
   /**
    * Start the socket server
    */
-  def startup() {
+  def startup() = {
     listener = new TcpListener(InetAddressAndPort.create(host, port), kafkaApis, this)
     listener.start()
     info("Started socket server")
@@ -73,7 +73,7 @@ class TcpListener(localEp: InetAddressAndPort, kafkaApis: SimpleKafkaApi, socket
       info(s"Listening on ${localEp}")
       while (true) {
         val socket = serverSocket.accept()
-        new SocketIO(socket, classOf[RequestOrResponse]).readHandleRespond((request) ⇒ {
+        new SocketIO(socket, classOf[RequestOrResponse]).readHandleRespond((request) => {
           kafkaApis.handle(request)
         })
       }

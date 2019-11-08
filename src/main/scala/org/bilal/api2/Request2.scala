@@ -12,6 +12,11 @@ object Request2 {
                      message: String)
       extends Request2(correlationId)
 
+  case class Consume2(correlationId: String,
+                      topicAndPartition: TopicAndPartition,
+                      offset: Long = 0)
+    extends Request2(correlationId)
+
   case class LeaderAndReplica(correlationId: String,
                               leaderReplicas: List[LeaderAndReplicas])
       extends Request2(correlationId)
