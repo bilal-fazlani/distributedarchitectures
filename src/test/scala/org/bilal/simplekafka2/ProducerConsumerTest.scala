@@ -6,6 +6,7 @@ import org.bilal.remote.TcpServer
 import org.dist.queue.server.Config
 import org.dist.queue.{TestUtils, ZookeeperTestHarness}
 import org.dist.util.Networks
+import org.scalatest.concurrent.Eventually
 import org.scalatest.{FunSuite, Matchers}
 import org.scalatestplus.mockito.MockitoSugar
 
@@ -14,6 +15,7 @@ class ProducerConsumerTest
     with Matchers
     with MockitoSugar
     with Codecs
+    with Eventually
     with ZookeeperTestHarness {
 
   test("should produce and consumer messages from five broker cluster") {
@@ -29,22 +31,19 @@ class ProducerConsumerTest
     broker4.start()
     broker5.start()
 
-    TestUtils.waitUntilTrue(() => broker1.controller.liveBrokers.size == 5,
-      "Waiting for all brokers to be discovered by the controller"
-    )
+    eventually{
+      broker1.controller.liveBrokers should have size 5
+    }
 
     broker1.kafkaZookeeper.createTopic("topic1", 2, 5)
 
-    TestUtils.waitUntilTrue(() =>
-      (
-        kafkaApi1.aliveBrokers.size == 5 &&
-          kafkaApi2.aliveBrokers.size == 5 &&
-          kafkaApi3.aliveBrokers.size == 5 &&
-          kafkaApi4.aliveBrokers.size == 5 &&
-          kafkaApi5.aliveBrokers.size == 5
-      ),
-      "waiting till topic metadata is propagated to all the servers"
-    )
+    eventually {
+      (kafkaApi1.aliveBrokers.size == 5 &&
+        kafkaApi2.aliveBrokers.size == 5 &&
+        kafkaApi3.aliveBrokers.size == 5 &&
+        kafkaApi4.aliveBrokers.size == 5 &&
+        kafkaApi5.aliveBrokers.size == 5) shouldBe true
+    }
 
     assert(
       kafkaApi1.leaderCache == kafkaApi2.leaderCache &&
@@ -53,7 +52,7 @@ class ProducerConsumerTest
         kafkaApi4.leaderCache == kafkaApi5.leaderCache
     )
 
-    val simpleProducer = new SimpleProducer2(address2)
+    val simpleProducer = new SimpleProducer2(address5)
     val offset1 = simpleProducer.produce("topic1", "key1", "message1")
     assert(offset1 == 1) //first offset
 
