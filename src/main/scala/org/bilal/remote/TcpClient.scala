@@ -10,27 +10,18 @@ import scala.util.Using
 
 class TcpClient[Req: Codec, Res: Codec](socket: Socket) extends Codecs {
   socket.setSoTimeout(5000)
-
-  def readHandleWithSocket(handler: (Req, Socket) => Unit): Unit = {
-    val responseBytes = read(socket)
-    val message = Serde.decode[Req](responseBytes)
-    handler(message, socket)
-  }
-
-  def readHandleRespond(handler: Req => Res): Unit = {
+  
+  def readAndHandleRequestThenSendResponse(handler: Req => Res): Unit = {
     val bytes = read(socket)
     val message = Serde.decode[Req](bytes)
     val response = handler(message)
     write(socket, Serde.encode(response))
   }
 
-  def read[T: Codec](): T = {
-    val bytes = read(socket)
-    Serde.decode[T](bytes)
-  }
-
-  def write[T: Codec](value: T): Unit = {
-    write(socket, Serde.encode(value))
+  def sendRequestAndThenReadResponse(requestMessage: Req): Res = {
+    write(socket, Serde.encode(requestMessage))
+    val responseBytes: Array[Byte] = read(socket)
+    Serde.decode[Res](responseBytes)
   }
 
   private def write(socket: Socket, bytes: Array[Byte]): Unit = {
@@ -40,12 +31,6 @@ class TcpClient[Req: Codec, Res: Codec](socket: Socket) extends Codecs {
     dataStream.writeInt(messageBytes.length)
     dataStream.write(messageBytes)
     outputStream.flush()
-  }
-
-  def requestResponse(requestMessage: Req): Res = {
-    write(socket, Serde.encode(requestMessage))
-    val responseBytes: Array[Byte] = read(socket)
-    Serde.decode[Res](responseBytes)
   }
 
   private def read(socket: Socket): Array[Byte] = {
@@ -61,7 +46,7 @@ object TcpClient{
   def sendReceiveTcp[A:Codec,B:Codec](request: A, to: (String, Int)): B = {
     Using.resource(new Socket(to._1, to._2)) { targetMachineSocket =>
       new TcpClient[A, B](targetMachineSocket)
-        .requestResponse(request)
+        .sendRequestAndThenReadResponse(request)
     }
   }
 }

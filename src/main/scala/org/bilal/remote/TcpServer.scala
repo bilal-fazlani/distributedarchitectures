@@ -26,7 +26,7 @@ class TcpServer[A:Codec, B:Codec](requestHandler: A => B, val port:Int)
       while (true) {
         val socket = serverSocket.accept()
         new TcpClient[A, B](socket)
-          .readHandleRespond(request => requestHandler(request))
+          .readAndHandleRequestThenSendResponse(request => requestHandler(request))
       }
     } catch {
       case NonFatal(err:SocketException) if err.getMessage == "Socket closed" =>
