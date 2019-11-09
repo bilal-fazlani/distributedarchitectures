@@ -1,8 +1,7 @@
 package org.bilal.simplekafka2
 
-import org.bilal.api.{Request2, Response2}
 import org.bilal.api.Request2.{LeaderAndReplica, UpdateMetadata}
-import org.bilal.api.Response2.{LeaderAndReplicaResponse2, UpdateMetadataResponse2}
+import org.bilal.api.{Request2, Response2}
 import org.bilal.codec.Codecs
 import org.bilal.remote.TcpClient
 import org.bilal.simplekafka2.KafkaZookeeper.ControllerExists
@@ -31,13 +30,13 @@ class Controller2(brokerId: Int, kafkaZookeeper: KafkaZookeeper)
     kafkaZookeeper.tryToBeController(brokerId) match {
       case Right(_) =>
         currentController = brokerId
-        onBecomingLeader()
+        onBecomingController()
       case Left(ControllerExists(controllerId)) =>
         currentController = controllerId
     }
   }
 
-  private def onBecomingLeader(): Unit = {
+  private def onBecomingController(): Unit = {
     liveBrokers = liveBrokers ++ kafkaZookeeper.allBrokers
     kafkaZookeeper.subscribeToTopicChanges(topics => {
       topics.foreach(t => {

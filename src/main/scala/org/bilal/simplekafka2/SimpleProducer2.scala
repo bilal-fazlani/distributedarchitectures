@@ -10,10 +10,12 @@ import org.dist.simplekafka.PartitionInfo
 
 class SimpleProducer2(bootstrapBrokerAddress: (String, Int)) extends SimpleKafkaClient {
   def produce(topic: String, key: String, message: String): Long = {
-    val topicMetadata: Map[TopicAndPartition, PartitionInfo] =
-      fetchMeta(topic, bootstrapBrokerAddress)
+    val topicMetadata: Map[TopicAndPartition, PartitionInfo] = fetchMeta(topic, bootstrapBrokerAddress)
+    require(topicMetadata.nonEmpty, s"fetched metadata size is 0 for topic $topic")
     val targetPartitionId = partitionIdFor(key, topicMetadata.size)
     val topicPartition = TopicAndPartition(topic, targetPartitionId)
+    println(topicMetadata)
+    println(topicPartition)
     val leaderBroker = topicMetadata(topicPartition).leader
     TcpClient
       .sendReceiveTcp[Request2, Response2](

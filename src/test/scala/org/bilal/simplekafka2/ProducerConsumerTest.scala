@@ -44,9 +44,7 @@ class ProducerConsumerTest
           kafkaApi4.aliveBrokers.size == 5 &&
           kafkaApi5.aliveBrokers.size == 5
       ),
-      "waiting till topic metadata is propagated to all the servers",
-      2000000,
-      2000000
+      "waiting till topic metadata is propagated to all the servers"
     )
 
     assert(

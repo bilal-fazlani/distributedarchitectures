@@ -1,5 +1,7 @@
 package org.bilal.simplekafka2
 
+import java.util.concurrent.ConcurrentHashMap
+
 import org.bilal.api.Request2._
 import org.bilal.api.Response2._
 import org.bilal.api._

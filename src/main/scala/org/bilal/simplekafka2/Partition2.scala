@@ -9,10 +9,6 @@ import org.dist.queue.common.TopicAndPartition
 import org.dist.queue.server.Config
 
 class Partition2(config:Config, topicPartition: TopicAndPartition) {
-  def makeFollower(leaderId: Int) = ()
-
-  def makeLeader() = ()
-
   private val fileName = s"${topicPartition.topic}-${topicPartition.partition}.log"
   private val fileUri = Paths.get(config.logDirs.head, fileName)
   val file = new SequenceFile2(fileUri.toAbsolutePath.toUri)

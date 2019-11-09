@@ -9,13 +9,14 @@ class ReplicaManager2(config:Config) {
   var allPartitions = new ConcurrentHashMap[TopicAndPartition, Partition2]()
 
   def makeLeader(topicAndPartition: TopicAndPartition):Unit = {
-    getOrCreatePartition(topicAndPartition).makeLeader()
+    getOrCreatePartition(topicAndPartition)
   }
 
   def makeFollower(topicAndPartition: TopicAndPartition, leaderId: Int):Unit =
-    getOrCreatePartition(topicAndPartition).makeFollower(leaderId)
+    getOrCreatePartition(topicAndPartition)
 
-  def getPartition(topicAndPartition: TopicAndPartition): Partition2 = allPartitions.get(topicAndPartition)
+  def getPartition(topicAndPartition: TopicAndPartition): Partition2 =
+    allPartitions.get(topicAndPartition)
 
   private def getOrCreatePartition(topicAndPartition: TopicAndPartition): Partition2 =
     allPartitions.computeIfAbsent(topicAndPartition, new Partition2(config, _))

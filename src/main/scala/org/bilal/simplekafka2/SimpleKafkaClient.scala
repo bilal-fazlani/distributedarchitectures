@@ -21,6 +21,6 @@ trait SimpleKafkaClient extends Codecs {
   }
 
   protected def partitionIdFor(key: String, numPartitions: Int): Int = {
-    Utils.abs(key.hashCode) % numPartitions
+    (Utils.abs(key.hashCode) % numPartitions) + 1
   }
 }
