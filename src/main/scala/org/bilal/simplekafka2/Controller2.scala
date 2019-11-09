@@ -1,20 +1,14 @@
 package org.bilal.simplekafka2
 
+import org.bilal.api.{Request2, Response2}
 import org.bilal.api.Request2.{LeaderAndReplica, UpdateMetadata}
-import org.bilal.api.Response2.{
-  LeaderAndReplicaResponse2,
-  UpdateMetadataResponse2
-}
+import org.bilal.api.Response2.{LeaderAndReplicaResponse2, UpdateMetadataResponse2}
 import org.bilal.codec.Codecs
 import org.bilal.remote.TcpClient
 import org.bilal.simplekafka2.KafkaZookeeper.ControllerExists
 import org.dist.queue.common.TopicAndPartition
 import org.dist.queue.utils.ZkUtils.Broker
-import org.dist.simplekafka.{
-  LeaderAndReplicas,
-  PartitionInfo,
-  PartitionReplicas
-}
+import org.dist.simplekafka.{LeaderAndReplicas, PartitionInfo, PartitionReplicas}
 
 import scala.collection.mutable
 
@@ -83,7 +77,7 @@ class Controller2(brokerId: Int, kafkaZookeeper: KafkaZookeeper)
     for (broker <- brokers) {
       val leaderAndReplicas = brokerToLeaderIsrRequest(broker)
       val request = LeaderAndReplica(leaderAndReplicas.toList)
-      TcpClient.sendReceiveTcp[LeaderAndReplica, LeaderAndReplicaResponse2](
+      TcpClient.sendReceiveTcp[Request2, Response2](
           request,
           (broker.host, broker.port)
         )
@@ -94,7 +88,7 @@ class Controller2(brokerId: Int, kafkaZookeeper: KafkaZookeeper)
   ): Unit = {
     liveBrokers.foreach(broker => {
       val request = UpdateMetadata(liveBrokers.toList, leaderAndReplicas.toList)
-      TcpClient.sendReceiveTcp[UpdateMetadata, UpdateMetadataResponse2](
+      TcpClient.sendReceiveTcp[Request2, Response2](
         request,
         (broker.host, broker.port)
       )
