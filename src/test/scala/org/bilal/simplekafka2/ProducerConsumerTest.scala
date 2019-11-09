@@ -17,14 +17,13 @@ class ProducerConsumerTest
     with ZookeeperTestHarness {
 
   test("should produce and consumer messages from five broker cluster") {
-    val (broker1, kafkaApi1) = newBroker(1)
-    val (broker2, kafkaApi2) = newBroker(2)
-    val (broker3, kafkaApi3) = newBroker(3)
-    val (broker4, kafkaApi4) = newBroker(4)
-    val (broker5, kafkaApi5) = newBroker(5)
+    val (broker1, kafkaApi1, address1) = newBroker(1)
+    val (broker2, kafkaApi2, address2) = newBroker(2)
+    val (broker3, kafkaApi3, address3) = newBroker(3)
+    val (broker4, kafkaApi4, address4) = newBroker(4)
+    val (broker5, kafkaApi5, address5) = newBroker(5)
 
-    broker1
-      .start() //broker1 will become controller as its the first one to start
+    broker1.start() //broker1 will become controller as its the first one to start
     broker2.start()
     broker3.start()
     broker4.start()
@@ -53,8 +52,28 @@ class ProducerConsumerTest
         kafkaApi3.leaderCache == kafkaApi4.leaderCache &&
         kafkaApi4.leaderCache == kafkaApi5.leaderCache
     )
+
+    val simpleProducer = new SimpleProducer2(address2)
+    val offset1 = simpleProducer.produce("topic1", "key1", "message1")
+    assert(offset1 == 1) //first offset
+
+    val offset2 = simpleProducer.produce("topic1", "key2", "message2")
+    assert(offset2 == 1) //first offset on different partition
+
+    val offset3 = simpleProducer.produce("topic1", "key3", "message3")
+
+    assert(offset3 == 2) //offset on first partition
+
+    val simpleConsumer = new SimpleConsumer2(address2)
+    val messages = simpleConsumer.consume("topic1")
+
+    messages should ===(Map(
+      "key1" -> "message1",
+      "key2" -> "message2",
+      "key3" -> "message3"
+    ))
   }
-  private def newBroker(brokerId: Int): (Server2, SimpleKafkaApi2) = {
+  private def newBroker(brokerId: Int): (Server2, SimpleKafkaApi2, (String, Int)) = {
     val networks = new Networks()
     val host = networks.hostname()
     val port = TestUtils.choosePort()
@@ -72,6 +91,6 @@ class ProducerConsumerTest
     val kafkaApi = new SimpleKafkaApi2(config, replicaManager)
     val controller = new Controller2(config.brokerId, kafkaZookeeper)
     val tcpServer = new TcpServer[Request2, Response2](kafkaApi.handle, port)
-    (new Server2(kafkaZookeeper, controller, tcpServer), kafkaApi)
+    (new Server2(kafkaZookeeper, controller, tcpServer), kafkaApi, (host, port))
   }
 }
