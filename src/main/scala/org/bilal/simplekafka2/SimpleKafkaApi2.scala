@@ -2,10 +2,10 @@ package org.bilal.simplekafka2
 
 import java.util.concurrent.ConcurrentHashMap
 
-import org.bilal.api.Request2._
-import org.bilal.api.Response2._
-import org.bilal.api._
-import org.bilal.codec.Codecs
+import org.bilal.simplekafka2.api.Request2._
+import org.bilal.simplekafka2.api.Response2._
+import org.bilal.simplekafka2.api._
+import org.bilal.simplekafka2.codec.Codecs
 import org.dist.queue.common.TopicAndPartition
 import org.dist.queue.server.Config
 import org.dist.queue.utils.ZkUtils.Broker

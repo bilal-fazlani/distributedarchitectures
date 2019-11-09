@@ -2,7 +2,7 @@ package org.bilal.remote
 
 import java.net.ConnectException
 
-import org.bilal.codec.Codecs
+import org.bilal.simplekafka2.codec.Codecs
 import org.dist.queue.ZookeeperTestHarness
 import org.mockito.MockitoSugar
 import org.scalatest.concurrent.Eventually

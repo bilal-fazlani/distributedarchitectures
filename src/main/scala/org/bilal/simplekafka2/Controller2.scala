@@ -1,8 +1,8 @@
 package org.bilal.simplekafka2
 
-import org.bilal.api.Request2.{LeaderAndReplica, UpdateMetadata}
-import org.bilal.api.{Request2, Response2}
-import org.bilal.codec.Codecs
+import org.bilal.simplekafka2.api.Request2.{LeaderAndReplica, UpdateMetadata}
+import org.bilal.simplekafka2.api.{Request2, Response2}
+import org.bilal.simplekafka2.codec.Codecs
 import org.bilal.remote.TcpClient
 import org.bilal.simplekafka2.KafkaZookeeper.ControllerExists
 import org.dist.queue.common.TopicAndPartition

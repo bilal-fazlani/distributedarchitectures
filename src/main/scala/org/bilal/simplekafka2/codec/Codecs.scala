@@ -1,10 +1,10 @@
-package org.bilal.codec
+package org.bilal.simplekafka2.codec
 
 import io.bullet.borer.Codec
 import io.bullet.borer.derivation.MapBasedCodecs._
-import org.bilal.api.Request2._
-import org.bilal.api.Response2._
-import org.bilal.api.{Request2, Response2}
+import org.bilal.simplekafka2.api.Request2._
+import org.bilal.simplekafka2.api.Response2._
+import org.bilal.simplekafka2.api.{Request2, Response2}
 import org.bilal.simplekafka2.Partition2.Record
 import org.dist.queue.common.TopicAndPartition
 import org.dist.queue.utils.ZkUtils.Broker

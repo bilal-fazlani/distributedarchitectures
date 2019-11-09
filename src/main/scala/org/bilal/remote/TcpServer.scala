@@ -3,7 +3,7 @@ package org.bilal.remote
 import java.net.{InetSocketAddress, ServerSocket, SocketException}
 
 import io.bullet.borer.Codec
-import org.bilal.codec.Codecs
+import org.bilal.simplekafka2.codec.Codecs
 
 import scala.util.control.NonFatal
 

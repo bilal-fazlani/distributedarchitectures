@@ -1,4 +1,4 @@
-package org.bilal.api
+package org.bilal.simplekafka2.api
 
 import org.dist.queue.common.TopicAndPartition
 import org.dist.simplekafka.PartitionInfo

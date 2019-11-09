@@ -1,4 +1,4 @@
-package org.bilal.codec
+package org.bilal.simplekafka2.codec
 
 import io.bullet.borer.{Cbor, Decoder, Encoder, Target}
 

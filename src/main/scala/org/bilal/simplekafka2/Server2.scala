@@ -1,6 +1,6 @@
 package org.bilal.simplekafka2
 
-import org.bilal.api.{Request2, Response2}
+import org.bilal.simplekafka2.api.{Request2, Response2}
 import org.bilal.remote.TcpServer
 
 class Server2(val kafkaZookeeper: KafkaZookeeper,

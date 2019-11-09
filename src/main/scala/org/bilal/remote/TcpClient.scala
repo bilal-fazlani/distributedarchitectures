@@ -4,13 +4,13 @@ import java.io.{DataInputStream, DataOutputStream}
 import java.net.Socket
 
 import io.bullet.borer.Codec
-import org.bilal.codec.{Codecs, Serde}
+import org.bilal.simplekafka2.codec.{Codecs, Serde}
 
 import scala.util.Using
 
 class TcpClient[Req: Codec, Res: Codec](socket: Socket) extends Codecs {
   socket.setSoTimeout(5000)
-  
+
   def readAndHandleRequestThenSendResponse(handler: Req => Res): Unit = {
     val bytes = read(socket)
     val message = Serde.decode[Req](bytes)
@@ -44,9 +44,9 @@ class TcpClient[Req: Codec, Res: Codec](socket: Socket) extends Codecs {
 }
 object TcpClient{
   def sendReceiveTcp[A:Codec,B:Codec](request: A, to: (String, Int)): B = {
-    Using.resource(new Socket(to._1, to._2)) { targetMachineSocket =>
-      new TcpClient[A, B](targetMachineSocket)
-        .sendRequestAndThenReadResponse(request)
+    Using.resource(new Socket(to._1, to._2)) {
+      new TcpClient[A, B](_)
+      .sendRequestAndThenReadResponse(request)
     }
   }
 }

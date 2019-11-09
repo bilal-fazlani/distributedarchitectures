@@ -1,6 +1,6 @@
 package org.bilal.simplekafka2
 
-import org.bilal.codec.Codecs
+import org.bilal.simplekafka2.codec.Codecs
 import org.dist.queue.server.Config
 import org.dist.queue.{TestUtils, ZookeeperTestHarness}
 import org.scalatest.concurrent.Eventually

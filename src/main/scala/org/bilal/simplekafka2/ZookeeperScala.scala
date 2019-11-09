@@ -6,7 +6,7 @@ import java.util
 import io.bullet.borer.Codec
 import org.I0Itec.zkclient.exception.ZkNoNodeException
 import org.I0Itec.zkclient.{IZkDataListener, ZkClient}
-import org.bilal.codec.{Codecs, Serde}
+import org.bilal.simplekafka2.codec.{Codecs, Serde}
 
 import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal

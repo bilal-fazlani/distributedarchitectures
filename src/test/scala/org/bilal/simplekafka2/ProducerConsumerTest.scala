@@ -1,7 +1,7 @@
 package org.bilal.simplekafka2
 
-import org.bilal.api.{Request2, Response2}
-import org.bilal.codec.Codecs
+import org.bilal.simplekafka2.api.{Request2, Response2}
+import org.bilal.simplekafka2.codec.Codecs
 import org.bilal.remote.TcpServer
 import org.dist.queue.server.Config
 import org.dist.queue.{TestUtils, ZookeeperTestHarness}
