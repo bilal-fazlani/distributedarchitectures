@@ -8,17 +8,17 @@ import org.bilal.simplekafka2.codec.{Codecs, Serde}
 
 import scala.util.Using
 
-class TcpClient[Req: Codec, Res: Codec](socket: Socket) extends Codecs {
+class TcpClient(socket: Socket) extends Codecs {
   socket.setSoTimeout(5000)
 
-  def readAndHandleRequestThenSendResponse(handler: Req => Res): Unit = {
+  def readAndHandleRequestThenSendResponse[Req: Codec](handler: Req => TcpResponse): Unit = {
     val bytes = read(socket)
     val message = Serde.decode[Req](bytes)
     val response = handler(message)
-    write(socket, Serde.encode(response))
+    write(socket, response.bytes)
   }
 
-  def sendRequestAndThenReadResponse(requestMessage: Req): Res = {
+  def sendRequestAndThenReadResponse[Req: Codec, Res: Codec](requestMessage: Req): Res = {
     write(socket, Serde.encode(requestMessage))
     val responseBytes: Array[Byte] = read(socket)
     Serde.decode[Res](responseBytes)
@@ -45,8 +45,8 @@ class TcpClient[Req: Codec, Res: Codec](socket: Socket) extends Codecs {
 object TcpClient{
   def sendReceiveTcp[A:Codec,B:Codec](request: A, to: (String, Int)): B = {
     Using.resource(new Socket(to._1, to._2)) {
-      new TcpClient[A, B](_)
-      .sendRequestAndThenReadResponse(request)
+      new TcpClient(_)
+      .sendRequestAndThenReadResponse[A, B](request)
     }
   }
 }

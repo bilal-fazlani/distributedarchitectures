@@ -5,7 +5,7 @@ import org.bilal.remote.TcpServer
 
 class Server2(val kafkaZookeeper: KafkaZookeeper,
               val controller: Controller2,
-              val tcpServer: TcpServer[Request2, Response2]) {
+              val tcpServer: TcpServer[Request2]) {
   def start(): Unit = {
     tcpServer.start()
     println(s"TCP server started on ${tcpServer.port}")

@@ -15,8 +15,7 @@ trait SimpleKafkaClient extends Codecs {
                            from: (String, Int)
                          ): Map[TopicAndPartition, PartitionInfo] = {
     val response = TcpClient
-      .sendReceiveTcp[Request2, Response2](GetTopicMetadata2(topic), from)
-      .asInstanceOf[GetTopicMetadataResponse2]
+      .sendReceiveTcp[Request2, GetTopicMetadataResponse2](GetTopicMetadata2(topic), from)
     response.topicPartitions
   }
 

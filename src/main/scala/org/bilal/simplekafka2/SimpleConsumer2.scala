@@ -13,8 +13,7 @@ class SimpleConsumer2(bootstrapBrokerAddress: (String, Int)) extends SimpleKafka
     val meta = fetchMeta(topic, bootstrapBrokerAddress)
     meta.flatMap {
       case (tp:TopicAndPartition,v:PartitionInfo) =>
-        TcpClient.sendReceiveTcp[Request2, Response2](Consume2(tp), v.leader.targetAddress)
-        .asInstanceOf[ConsumeResponse2]
+        TcpClient.sendReceiveTcp[Request2, ConsumeResponse2](Consume2(tp), v.leader.targetAddress)
         .messages
     }
   }

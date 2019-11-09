@@ -5,7 +5,7 @@ import java.util.concurrent.{ScheduledExecutorService, ScheduledFuture, TimeUnit
 import org.bilal.gossip.api.Address
 import org.bilal.gossip.api.Gossip.{GossipRequest, GossipResponse}
 import org.bilal.gossip.codec.Codecs
-import org.bilal.remote.{TcpClient, TcpServer}
+import org.bilal.remote.{ResponseMarshaller, TcpClient, TcpResponse, TcpServer}
 
 import scala.language.implicitConversions
 import scala.util.Random
@@ -14,15 +14,16 @@ class Gossiper(self: Address,
                seed: Address,
                scheduledExecutorService: ScheduledExecutorService)
     extends Thread
+    with ResponseMarshaller
     with Codecs {
 
-  private val handler: GossipRequest => GossipResponse = req => {
+  private val handler: GossipRequest => TcpResponse = req => {
     digest = (digest :+ req.from).distinct
     digest = (digest :++ req.data).distinct
     GossipResponse(digest.distinct)
   }
   private val server =
-    new TcpServer[GossipRequest, GossipResponse](handler, self.port)
+    new TcpServer[GossipRequest](handler, self.port)
   var digest = List[Address](seed)
 
   override def start(): Unit = {

@@ -1,10 +1,9 @@
 package org.bilal.simplekafka2
 
-import java.util.concurrent.ConcurrentHashMap
-
+import org.bilal.remote.{ResponseMarshaller, TcpResponse}
+import org.bilal.simplekafka2.api.Request2
 import org.bilal.simplekafka2.api.Request2._
 import org.bilal.simplekafka2.api.Response2._
-import org.bilal.simplekafka2.api._
 import org.bilal.simplekafka2.codec.Codecs
 import org.dist.queue.common.TopicAndPartition
 import org.dist.queue.server.Config
@@ -12,12 +11,14 @@ import org.dist.queue.utils.ZkUtils.Broker
 import org.dist.simplekafka._
 
 class SimpleKafkaApi2(config: Config, replicaManager: ReplicaManager2)
-    extends Codecs {
+    extends Codecs
+    with ResponseMarshaller
+{
 
   var aliveBrokers = List[Broker]()
   var leaderCache = Map[TopicAndPartition, PartitionInfo]()
 
-  def handle(request: Request2): Response2 = {
+  def handle(request: Request2): TcpResponse = {
     request match {
       case Produce(topicAndPartition, key, message, correlationId) =>
         val partition = replicaManager.getPartition(topicAndPartition)

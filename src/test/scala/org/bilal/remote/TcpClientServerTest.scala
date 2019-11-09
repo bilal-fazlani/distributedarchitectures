@@ -13,14 +13,15 @@ class TcpClientServerTest
     with Matchers
     with Codecs
     with Eventually
+    with ResponseMarshaller
     with ZookeeperTestHarness
     with MockitoSugar {
 
   test("should send message and receive response"){
-    val handler1 = (request:String) => request.toUpperCase
+    val handler1: String => TcpResponse = (request:String) => request.toUpperCase
 
     val port = 5676
-    val server = new TcpServer[String,String](handler1, port)
+    val server = new TcpServer[String](handler1, port)
 
     server.start()
 

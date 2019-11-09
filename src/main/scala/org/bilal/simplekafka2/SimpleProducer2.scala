@@ -18,11 +18,10 @@ class SimpleProducer2(bootstrapBrokerAddress: (String, Int)) extends SimpleKafka
     println(topicPartition)
     val leaderBroker = topicMetadata(topicPartition).leader
     TcpClient
-      .sendReceiveTcp[Request2, Response2](
+      .sendReceiveTcp[Request2, ProduceResponse2](
         Produce(topicPartition, key, message),
         leaderBroker.targetAddress
       )
-      .asInstanceOf[ProduceResponse2]
       .offset
   }
 }

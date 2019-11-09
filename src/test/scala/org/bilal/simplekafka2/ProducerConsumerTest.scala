@@ -1,8 +1,8 @@
 package org.bilal.simplekafka2
 
-import org.bilal.simplekafka2.api.{Request2, Response2}
-import org.bilal.simplekafka2.codec.Codecs
 import org.bilal.remote.TcpServer
+import org.bilal.simplekafka2.api.Request2
+import org.bilal.simplekafka2.codec.Codecs
 import org.dist.queue.server.Config
 import org.dist.queue.{TestUtils, ZookeeperTestHarness}
 import org.dist.util.Networks
@@ -89,7 +89,7 @@ class ProducerConsumerTest
     val replicaManager = new ReplicaManager2(config)
     val kafkaApi = new SimpleKafkaApi2(config, replicaManager)
     val controller = new Controller2(config.brokerId, kafkaZookeeper)
-    val tcpServer = new TcpServer[Request2, Response2](kafkaApi.handle, port)
+    val tcpServer = new TcpServer[Request2](kafkaApi.handle, port)
     (new Server2(kafkaZookeeper, controller, tcpServer), kafkaApi, (host, port))
   }
 }

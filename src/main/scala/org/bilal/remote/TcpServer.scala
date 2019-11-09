@@ -5,9 +5,9 @@ import java.net.{InetSocketAddress, ServerSocket, SocketException}
 import io.bullet.borer.Codec
 import org.bilal.simplekafka2.codec.Codecs
 
+import scala.language.implicitConversions
 import scala.util.control.NonFatal
-
-class TcpServer[A:Codec, B:Codec](requestHandler: A => B, val port:Int)
+class TcpServer[A:Codec](requestHandler: A => TcpResponse, val port:Int)
     extends Thread
     with Codecs {
 
@@ -25,8 +25,8 @@ class TcpServer[A:Codec, B:Codec](requestHandler: A => B, val port:Int)
       serverSocket.bind(new InetSocketAddress(port))
       while (true) {
         val socket = serverSocket.accept()
-        new TcpClient[A, B](socket)
-          .readAndHandleRequestThenSendResponse(request => requestHandler(request))
+        new TcpClient(socket)
+          .readAndHandleRequestThenSendResponse[A](request => requestHandler(request))
       }
     } catch {
       case NonFatal(err:SocketException) if err.getMessage == "Socket closed" =>
